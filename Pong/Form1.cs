@@ -20,9 +20,11 @@ namespace Pong
         int player1Score = 0;
         int player2Score = 0;
 
-        int playerSpeed = 4;
+        int playerSpeed = 6;
         int ballXSpeed = -7;
         int ballYSpeed = 7;
+
+        int playerTurn = 1;
 
         bool wDown = false;
         bool sDown = false;
@@ -34,8 +36,9 @@ namespace Pong
         bool rightArrowDown = false;
 
         SolidBrush blueBrush = new SolidBrush(Color.DodgerBlue);
+        SolidBrush pinkBrush = new SolidBrush(Color.Coral);
         SolidBrush whiteBrush = new SolidBrush(Color.White);
-        Pen redPen = new Pen(Color.White, 5);
+        Pen whitePen = new Pen(Color.White, 3);
 
         public Form1()
         {
@@ -116,7 +119,7 @@ namespace Pong
                 player1.Y -= playerSpeed;
             }
 
-            if (aDown == true && player1.X < this.Width - player1.Width)
+            if (aDown == true && player1.X > 0)
             {
                 player1.X -= playerSpeed;
             }
@@ -137,7 +140,7 @@ namespace Pong
                 player2.Y -= playerSpeed;
             }
 
-            if (leftArrowDown == true && player2.X < this.Width - player2.Width)
+            if (leftArrowDown == true && player2.X > 0)
             {
                 player2.X -= playerSpeed;
             }
@@ -157,26 +160,35 @@ namespace Pong
             {
                 ballYSpeed *= -1;  // or: ballYSpeed = -ballYSpeed; 
             }
-
-            if (ball.X < 0 || ball.X > this.Width - ball.Width)
+            else if (ball.X > this.Width - ball.Width)
             {
-                ballXSpeed *= -1;  // or: ballYSpeed = -ballYSpeed; 
+                ballXSpeed *= -1;
             }
 
             //ball collison with player!!!!!
-            if (player1.IntersectsWith(ball))
+            if (playerTurn == 1)
             {
-                ballXSpeed *= -1;
-                ball.X = player1.X + ball.Width;
+                if (player1.IntersectsWith(ball))
+                {
+                    ballXSpeed *= -1;
+                    ball.X = player1.X + ball.Width;
+
+                    playerTurn = 2;
+                }
             }
-            else if (player2.IntersectsWith(ball))
+            else
             {
-                ballXSpeed *= -1;
-                ball.X = player2.X - ball.Width;
+                if (player2.IntersectsWith(ball))
+                {
+                    ballXSpeed *= -1;
+                    ball.X = player2.X + ball.Width;
+
+                    playerTurn = 1;
+                }
             }
 
             //check for point scored
-            if (ball.X < 0)
+            if (ball.X < 0 && playerTurn == 1)
             {
                 player2Score++;
                 p2ScoreLabel.Text = $"{player2Score}";
@@ -185,9 +197,11 @@ namespace Pong
                 ball.Y = 195;
 
                 player1.Y = 170;
+                player1.X = 10;
                 player2.Y = 100;
+                player2.X = 10;
             }
-            else if (ball.X > 600)
+            else if (ball.X < 0 && playerTurn == 2)
             {
                 player1Score++;
                 p1ScoreLabel.Text = $"{player1Score}";
@@ -196,7 +210,9 @@ namespace Pong
                 ball.Y = 195;
 
                 player1.Y = 170;
+                player1.X = 10;
                 player2.Y = 100;
+                player2.X = 10;
             }
 
             //check score and stop game if either player is at 3 
@@ -212,15 +228,25 @@ namespace Pong
                 winLabel.Visible = true;
                 winLabel.Text = "Player 2 Wins!!";
             }
-
             Refresh();
         }
 
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
+            //show players and ball
             e.Graphics.FillRectangle(blueBrush, player1);
-            e.Graphics.FillRectangle(blueBrush, player2);
+            e.Graphics.FillRectangle(pinkBrush, player2);
             e.Graphics.FillRectangle(whiteBrush, ball);
+
+            //show active player with white outline
+            if (playerTurn == 1)
+            {
+                e.Graphics.DrawRectangle(whitePen, player1);
+            }
+            else
+            {
+                e.Graphics.DrawRectangle(whitePen, player2);
+            }
         }
     }
 }
